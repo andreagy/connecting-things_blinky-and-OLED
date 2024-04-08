@@ -1,5 +1,8 @@
 # Install script for directory: C:/Users/andig/Documents/Metropolia_localsave/C++/project-template
 
+# Set minimum required version of CMake
+cmake_minimum_required(VERSION 3.12)
+
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/pico-modbus")
