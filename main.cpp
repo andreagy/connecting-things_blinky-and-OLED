@@ -1,7 +1,7 @@
-#include <stdio.h>
+#include <cstdio>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
-#include <math.h>
+#include <cmath>
 #include "pico/time.h"
 #include "hardware/timer.h"
 #include "ssd1306.h"
@@ -13,6 +13,8 @@
 
 #define USE_SSD1306
 
+volatile bool ledTimerFired = false;
+int ledState = 0;
 
 void create_led(uint led) {
     uint period, freq;
@@ -27,6 +29,13 @@ void create_led(uint led) {
     gpio_set_function(led, GPIO_FUNC_PWM);
 }
 
+void adjust_bright(uint led, int bright){
+    uint slice, channel;
+    slice = pwm_gpio_to_slice_num(led);
+    channel = pwm_gpio_to_channel(led);
+    pwm_set_chan_level(slice,channel,bright);
+}
+
 // Timer for slow LED blink
 bool timer_callback(repeating_timer_t *rt) {
     ledTimerFired = true;
@@ -37,12 +46,9 @@ bool timer_callback(repeating_timer_t *rt) {
 int main() {
 
     // Initialize LED pins
-    gpio_init(LED1_PIN);
-    gpio_set_dir(LED1_PIN, GPIO_OUT);
-    gpio_init(LED2_PIN);
-    gpio_set_dir(LED2_PIN, GPIO_OUT);
-    gpio_init(LED3_PIN);
-    gpio_set_dir(LED3_PIN, GPIO_OUT);
+    create_led(LED1_PIN);
+    create_led(LED2_PIN);
+    create_led(LED3_PIN);
 
     // Initialize chosen serial port
     stdio_init_all();
@@ -50,7 +56,7 @@ int main() {
     // Create the timer
     repeating_timer_t timer;
     //Set it to 1Hz
-    if (!add_repeating_timer_us(1000, timer_callback, NULL, &timer)) {
+    if (!add_repeating_timer_us(1000000, timer_callback, nullptr, &timer)) {
         printf("Failed to add timer\n");
         return 1;
     }
@@ -74,18 +80,16 @@ int main() {
     while (true) {
         // Blink LED (pin 21) at 1Hz
         if (ledTimerFired) {
-            if (isCalibrated.state == 0) {
-                adjust_bright(LED2_PIN, ledState);
-                if (ledState) {
-                    ledState = 0;
-                } else {
-                    ledState = 100;
-                }
+            // Toggle LED state
+            if (ledState == 0) {
+                adjust_bright(LED2_PIN, 100); // Turn on LED
+                ledState = 1;
+            } else {
+                adjust_bright(LED2_PIN, 0); // Turn off LED
+                ledState = 0;
             }
+            // Reset timer flag
             ledTimerFired = false;
         }
-
-
     }
-}
 }

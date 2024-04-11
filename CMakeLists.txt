@@ -1,58 +1,60 @@
-# Install script for directory: C:/Users/andig/Documents/Metropolia_localsave/C++/project-template
-
 # Set minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
 
-# Set the install prefix
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/pico-modbus")
-endif()
-string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+# Include build functions from Pico SDK
+include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
-# Set the install configuration name.
-if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
-    if(BUILD_TYPE)
-        string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
-                CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
-    else()
-        set(CMAKE_INSTALL_CONFIG_NAME "Debug")
-    endif()
-    message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
-endif()
+# Set board type because we are building for PicoW
+set(PICO_BOARD pico_w)
 
-# Set the component getting installed.
-if(NOT CMAKE_INSTALL_COMPONENT)
-    if(COMPONENT)
-        message(STATUS "Install component: \"${COMPONENT}\"")
-        set(CMAKE_INSTALL_COMPONENT "${COMPONENT}")
-    else()
-        set(CMAKE_INSTALL_COMPONENT)
-    endif()
-endif()
+# Set name of project (as PROJECT_NAME) and C/C   standards
+project(blinky_and_OLED C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
-# Is this installation the result of a crosscompile?
-if(NOT DEFINED CMAKE_CROSSCOMPILING)
-    set(CMAKE_CROSSCOMPILING "TRUE")
-endif()
+# Creates a pico-sdk subdirectory in our project for the libraries
+pico_sdk_init()
 
-# Set default install directory permissions.
-if(NOT DEFINED CMAKE_OBJDUMP)
-    set(CMAKE_OBJDUMP "C:/Pico_SDK_v1.5.0/gcc-arm-none-eabi/bin/arm-none-eabi-objdump.exe")
-endif()
+#add_compile_definitions(MQTTCLIENT_QOS2=1)
 
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-    # Include the install script for each subdirectory.
-    include("C:/Users/andig/Documents/Metropolia_localsave/C++/project-template/cmake-build-debug/pico-sdk/cmake_install.cmake")
+add_compile_options(-Wall
+        -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
+        -Wno-unused-function # we have some for the docs that aren't called
+        -Wno-maybe-uninitialized
+)
+file(GLOB MQTT_SOURCES "paho.mqtt.embedded-c/MQTTPacket/src/*.c")
 
-endif()
+# Tell CMake where to find the executable source file
+add_executable(${PROJECT_NAME}
+        main.cpp
+        display/framebuf.cpp
+        display/framebuf.h
+        display/mono_vlsb.cpp
+        display/mono_vlsb.h
+        display/ssd1306.cpp
+        display/ssd1306.h
+)
 
-if(CMAKE_INSTALL_COMPONENT)
-    set(CMAKE_INSTALL_MANIFEST "install_manifest_${CMAKE_INSTALL_COMPONENT}.txt")
-else()
-    set(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
-endif()
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME})
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
-        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/andig/Documents/Metropolia_localsave/C++/project-template/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
-        "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+# this adds a post build command that tries to copy uf2 to Pico
+#add_custom_command(TARGET ${PROJECT_NAME}
+#        POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.uf2 d: )
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+        display
+)
+
+# Link to pico_stdlib (gpio, time, etc. functions)
+target_link_libraries(${PROJECT_NAME}
+        pico_stdlib
+        hardware_pwm
+        hardware_gpio
+        hardware_i2c
+)
+
+# Enable usb output, disable uart output
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
