@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/andig/Documents/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED
+# Install script for directory: D:/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/blinky_and_OLED")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/ex3_blinky_and_OLED")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/andig/Documents/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED/cmake-build-debug/pico-sdk/cmake_install.cmake")
+  include("D:/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED/cmake-build-debug/pico-sdk/cmake_install.cmake")
 
 endif()
 
@@ -51,5 +51,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/andig/Documents/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/Metropolia_localsave/IoT_Connecting_Things/ex3_blinky_and_OLED/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
